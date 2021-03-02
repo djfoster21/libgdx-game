@@ -2,40 +2,47 @@ package com.cerberius.gordosandia.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.List;
+import static com.cerberius.gordosandia.screens.BaseScreen.VIEWPORT_HEIGHT;
 
 public class EnemyLine {
+
+    public static final String TEXTURE = "enemy.png";
+    public static final int SPRITE_WIDTH = 64;
+    public static final int SPRITE_HEIGHT = 64;
     Texture texture;
-    Array<Sprite> sprites;
+    Array<Enemy> enemies;
     public static final int MAX_SPRITES = 6;
-    public EnemyLine(){
-        texture = new Texture(Gdx.files.internal("enemy.png"));
-        sprites = new Array<>();
-        Array<Integer> values = new Array<>();
-        while(values.size <= MAX_SPRITES-2){
-            int position = MathUtils.floor((MathUtils.random() * 7) + 1);
-            if(!values.contains(position,false)){
-                values.add(position);
+
+    public EnemyLine() {
+        this.texture = new Texture(Gdx.files.internal(TEXTURE));
+        this.enemies = new Array<>();
+        final int holePosition = MathUtils.ceil(MathUtils.random() * MAX_SPRITES);
+        final int neighbourPosition = holePosition == MAX_SPRITES ? holePosition - 1 : holePosition + 1;
+
+        for (int i = 0; i <= MAX_SPRITES; i++) {
+            if (i == holePosition || i == neighbourPosition) {
+                continue;
             }
-        }
-        for(Integer position : new Array.ArrayIterator<>(values)){
-
-            Sprite sprite = new Sprite(texture,64,64);
-            sprite.setPosition(480 - 64*position,800);
-            sprites.add(sprite);
-        }
-    }
-    public void logic(){
-        for(Sprite sprite : new Array.ArrayIterator<>(sprites)){
-            sprite.setY(sprite.getY() - 200 * Gdx.graphics.getDeltaTime());
+            this.enemies.add(
+                    new Enemy(this.texture, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_WIDTH * i, VIEWPORT_HEIGHT));
         }
     }
 
-    public Array<Sprite> getSprites() {
-        return sprites;
+    public void logic() {
+        for (final Enemy enemy : new Array.ArrayIterator<>(this.enemies)) {
+            enemy.logic();
+        }
+    }
+
+    public Array<Enemy> getEnemies() {
+        return this.enemies;
+    }
+
+
+    public void removeEnemy(final Enemy enemy) {
+        this.enemies.removeValue(enemy, true);
     }
 }

@@ -1,17 +1,17 @@
 package com.cerberius.gordosandia.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.cerberius.gordosandia.GameMain;
+import com.cerberius.gordosandia.entities.Enemy;
 import com.cerberius.gordosandia.entities.EnemyLine;
 import com.cerberius.gordosandia.entities.Player;
 
-import java.sql.Time;
 
 public class GameScreen extends BaseScreen {
 
@@ -20,67 +20,85 @@ public class GameScreen extends BaseScreen {
     Player player;
     Array<EnemyLine> enemies;
     long lastSpawn;
-    Array<Sound> sounds;
+    Texture background;
+    int bgPosition;
 
-    public GameScreen(GameMain gameMain) {
+
+    public GameScreen(final GameMain gameMain) {
         super(gameMain);
-        lastFrameTime = TimeUtils.millis();
-        player = new Player();
-        enemies = new Array<>();
-        enemies.add(new EnemyLine());
-        lastSpawn = 0;
-        sounds = new Array<>();
-        sounds.add(
-                Gdx.audio.newSound(Gdx.files.internal("sound1.mp3")),
-                Gdx.audio.newSound(Gdx.files.internal("sound2.mp3")),
-                Gdx.audio.newSound(Gdx.files.internal("sound3.mp3"))
-        );
+        this.lastFrameTime = TimeUtils.millis();
+        this.player = new Player();
+        this.enemies = new Array<>();
+        this.enemies.add(new EnemyLine());
+        this.lastSpawn = 0;
+        this.background = new Texture(Gdx.files.internal("background2.jpg"));
+        this.background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        this.bgPosition = 0;
     }
 
     @Override
-    public void render(float delta) {
-        gameRunTime += TimeUtils.timeSinceMillis(lastFrameTime);
-        lastFrameTime = TimeUtils.millis();
-        ScreenUtils.clear(100,100,25,1);
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
+    public void render(final float delta) {
+        this.gameRunTime += TimeUtils.timeSinceMillis(this.lastFrameTime);
+        this.lastFrameTime = TimeUtils.millis();
+        ScreenUtils.clear(Color.GRAY);
 
-        game.batch.begin();
-        game.font.draw(game.batch,"Seconds: "+getRuntimeInSeconds(),0,12);
-        for(EnemyLine enemyLine : new Array.ArrayIterator<>(enemies)){
-            Array<Sprite> sprites = enemyLine.getSprites();
-            for(Sprite sprite : new Array.ArrayIterator<>(sprites)){
-                sprite.draw(game.batch);
-            }
-        }
-        player.getSprite().draw(game.batch,1);
-        game.batch.end();
-        player.logic(camera);
-        for(EnemyLine enemyLine : new Array.ArrayIterator<>(enemies)){
+        this.camera.update();
+
+        this.processSpriteBatch();
+
+        this.player.logic(this.camera);
+        for (final EnemyLine enemyLine : new Array.ArrayIterator<>(this.enemies)) {
             enemyLine.logic();
-            Array<Sprite> sprites = enemyLine.getSprites();
-            for(Sprite sprite : new Array.ArrayIterator<>(sprites)){
-                if(player.getSprite().getBoundingRectangle().overlaps(sprite.getBoundingRectangle())){
-                    sprites.removeValue(sprite,true);
-                    int soundIndex = MathUtils.ceil(MathUtils.random() * 3 ) -1 ;
-                    sounds.get(soundIndex).play();
+            final Array<Enemy> enemies = enemyLine.getEnemies();
+            for (final Enemy enemy : new Array.ArrayIterator<>(enemies)) {
+                if (this.player.checkCollision(enemy.getSprite())) {
+                    enemyLine.removeEnemy(enemy);
+                }
+                if (enemy.getSprite().getY() == 0) {
+                    this.enemies.removeValue(enemyLine, true);
                 }
             }
-            if(enemyLine.getSprites().get(0).getX() == 0){
-                enemies.removeValue(enemyLine,true);
-            }
         }
-        spawnEnemy();
+        this.spawnEnemy();
         super.render(delta);
     }
-    public long getRuntimeInSeconds()
-    {
-        return  gameRunTime != 0 ? (long) MathUtils.ceil( gameRunTime / 1000  ) : 0;
+
+    private void processSpriteBatch() {
+
+        this.game.batch.setProjectionMatrix(this.camera.combined);
+        this.game.batch.begin();
+        this.drawBackground();
+        this.game.font.draw(this.game.batch, "Seconds: " + this.getRuntimeInSeconds(), 0, 12);
+        for (final EnemyLine enemyLine : new Array.ArrayIterator<>(this.enemies)) {
+            final Array<Enemy> enemies = enemyLine.getEnemies();
+            for (final Enemy enemy : new Array.ArrayIterator<>(enemies)) {
+                enemy.getSprite().draw(this.game.batch, 1);
+            }
+        }
+        this.player.getSprite().draw(this.game.batch, 1);
+        this.game.batch.end();
     }
-    public void spawnEnemy(){
-        if(getRuntimeInSeconds() % 2 == 0 && getRuntimeInSeconds() != lastSpawn){
-            enemies.add(new EnemyLine());
-            lastSpawn = getRuntimeInSeconds();
+
+    private void drawBackground() {
+        this.game.batch.draw(
+                this.background,
+                0,
+                0,
+                0,
+                this.bgPosition -= 200 * Gdx.graphics.getDeltaTime(),
+                Gdx.graphics.getWidth(),
+                Gdx.graphics.getHeight()
+        );
+    }
+
+    public long getRuntimeInSeconds() {
+        return this.gameRunTime != 0 ? (long) MathUtils.ceil(this.gameRunTime / 1000) : 0;
+    }
+
+    public void spawnEnemy() {
+        if (this.getRuntimeInSeconds() % 2 == 0 && this.getRuntimeInSeconds() != this.lastSpawn) {
+            this.enemies.add(new EnemyLine());
+            this.lastSpawn = this.getRuntimeInSeconds();
         }
     }
 }
