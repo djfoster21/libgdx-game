@@ -115,5 +115,5 @@ Thumbs.db
 /ios/IOSLauncher.app.dSYM
 
 
-/android/assets/
+/android/assets/*
 .idea

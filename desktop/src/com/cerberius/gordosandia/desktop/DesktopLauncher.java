@@ -2,11 +2,13 @@ package com.cerberius.gordosandia.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.cerberius.gordosandia.GordoSandiaGame;
+import com.cerberius.gordosandia.GameMain;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new GordoSandiaGame(), config);
+		config.width = 480;
+		config.height = 800;
+		new LwjglApplication(new GameMain(), config);
 	}
 }
