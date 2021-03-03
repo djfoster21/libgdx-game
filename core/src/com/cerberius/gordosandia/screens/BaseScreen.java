@@ -1,19 +1,19 @@
 package com.cerberius.gordosandia.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.cerberius.gordosandia.GameMain;
 
 public class BaseScreen implements Screen {
-    public static final int VIEWPORT_WIDTH = 448;
-    public static final int VIEWPORT_HEIGHT = 800;
     final GameMain game;
-    OrthographicCamera camera;
+
+    public OrthographicCamera camera;
 
     BaseScreen(final GameMain game) {
         this.game = game;
         this.camera = new OrthographicCamera();
-        this.camera.setToOrtho(false, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        this.camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override
@@ -28,7 +28,7 @@ public class BaseScreen implements Screen {
 
     @Override
     public void resize(final int width, final int height) {
-
+        this.camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override

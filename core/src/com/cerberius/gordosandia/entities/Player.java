@@ -13,6 +13,8 @@ public class Player extends Entity {
     Array<Sound> sounds;
     Sprite sprite;
     Texture texture;
+    int stressLevel;
+    public static int MAX_STRESS_LEVEL = 100;
 
     public Player() {
         this.texture = new Texture(Gdx.files.internal("playerSprite.png"));
@@ -43,6 +45,10 @@ public class Player extends Entity {
     public boolean checkCollision(final Sprite enemySprite) {
         if (this.getSprite().getBoundingRectangle().overlaps(enemySprite.getBoundingRectangle())) {
             final int soundIndex = MathUtils.ceil(MathUtils.random() * 3) - 1;
+            for (final Sound sound : new Array.ArrayIterator<>(this.sounds)) {
+                sound.stop();
+            }
+            this.stressLevel = this.stressLevel >= MAX_STRESS_LEVEL ? MAX_STRESS_LEVEL : this.stressLevel + 10;
             this.sounds.get(soundIndex).play(0.5f);
             return true;
         }

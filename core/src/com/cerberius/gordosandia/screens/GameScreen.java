@@ -3,6 +3,7 @@ package com.cerberius.gordosandia.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -45,7 +46,7 @@ public class GameScreen extends BaseScreen {
         this.camera.update();
 
         this.processSpriteBatch();
-
+        this.processShapeBatch();
         this.player.logic(this.camera);
         for (final EnemyLine enemyLine : new Array.ArrayIterator<>(this.enemies)) {
             enemyLine.logic();
@@ -63,6 +64,15 @@ public class GameScreen extends BaseScreen {
         super.render(delta);
     }
 
+    private void processShapeBatch() {
+        this.game.shapeRenderer.setProjectionMatrix(this.camera.combined);
+        this.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        this.game.shapeRenderer.setColor(Color.WHITE);
+        this.game.shapeRenderer.rect(0, Gdx.graphics.getHeight() - 50, Gdx.graphics.getWidth(), 50);
+        this.game.shapeRenderer.end();
+        this.game.shapeRenderer.flush();
+    }
+
     private void processSpriteBatch() {
 
         this.game.batch.setProjectionMatrix(this.camera.combined);
@@ -77,6 +87,7 @@ public class GameScreen extends BaseScreen {
         }
         this.player.getSprite().draw(this.game.batch, 1);
         this.game.batch.end();
+        this.game.batch.flush();
     }
 
     private void drawBackground() {
